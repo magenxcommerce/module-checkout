@@ -21,15 +21,12 @@ class ImageProvider
 
     /**
      * @var \Magento\Checkout\CustomerData\ItemPoolInterface
-     * @deprecated 100.2.7 No need for the pool as images are resolved in the default item implementation
+     * @deprecated No need for the pool as images are resolved in the default item implementation
      * @see \Magento\Checkout\CustomerData\DefaultItem::getProductForThumbnail
      */
     protected $itemPool;
 
-    /**
-     * @var \Magento\Checkout\CustomerData\DefaultItem
-     * @since 100.2.7
-     */
+    /** @var \Magento\Checkout\CustomerData\DefaultItem */
     protected $customerDataItem;
 
     /**

@@ -6,18 +6,10 @@
 namespace Magento\Checkout\Block\Checkout;
 
 use Magento\Customer\Api\CustomerRepositoryInterface as CustomerRepository;
-use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Customer\Helper\Address as AddressHelper;
 use Magento\Customer\Model\Session;
 use Magento\Directory\Helper\Data as DirectoryHelper;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
 
-/**
- * Fields attribute merger.
- *
- * @SuppressWarnings(PHPMD.CookieAndSessionMisuse)
- */
 class AttributeMerger
 {
     /**
@@ -54,7 +46,6 @@ class AttributeMerger
         'alpha' => 'validate-alpha',
         'numeric' => 'validate-number',
         'alphanumeric' => 'validate-alphanum',
-        'alphanum-with-spaces' => 'validate-alphanum-with-spaces',
         'url' => 'validate-url',
         'email' => 'email2',
         'length' => 'validate-length',
@@ -76,7 +67,7 @@ class AttributeMerger
     private $customerRepository;
 
     /**
-     * @var CustomerInterface
+     * @var \Magento\Customer\Api\Data\CustomerInterface
      */
     private $customer;
 
@@ -278,7 +269,6 @@ class AttributeMerger
         for ($lineIndex = 0; $lineIndex < (int)$attributeConfig['size']; $lineIndex++) {
             $isFirstLine = $lineIndex === 0;
             $line = [
-                'label' => __("%1: Line %2", $attributeConfig['label'], $lineIndex + 1),
                 'component' => 'Magento_Ui/js/form/element/abstract',
                 'config' => [
                     // customScope is used to group elements within a single form e.g. they can be validated separately
@@ -289,7 +279,6 @@ class AttributeMerger
                 'dataScope' => $lineIndex,
                 'provider' => $providerName,
                 'validation' => $isFirstLine
-                //phpcs:ignore Magento2.Performance.ForeachArrayMerge
                     ? array_merge(
                         ['required-entry' => (bool)$attributeConfig['required']],
                         $attributeConfig['validation']
@@ -320,14 +309,10 @@ class AttributeMerger
     }
 
     /**
-     * Returns default attribute value.
-     *
      * @param string $attributeCode
-     * @throws NoSuchEntityException
-     * @throws LocalizedException
      * @return null|string
      */
-    protected function getDefaultValue($attributeCode): ?string
+    protected function getDefaultValue($attributeCode)
     {
         if ($attributeCode === 'country_id') {
             return $this->directoryHelper->getDefaultCountry();
@@ -361,13 +346,9 @@ class AttributeMerger
     }
 
     /**
-     * Returns logged customer.
-     *
-     * @throws NoSuchEntityException
-     * @throws LocalizedException
-     * @return CustomerInterface|null
+     * @return \Magento\Customer\Api\Data\CustomerInterface|null
      */
-    protected function getCustomer(): ?CustomerInterface
+    protected function getCustomer()
     {
         if (!$this->customer) {
             if ($this->customerSession->isLoggedIn()) {
@@ -382,14 +363,14 @@ class AttributeMerger
     /**
      * Retrieve field options from attribute configuration
      *
-     * @param mixed $attributeCode
+     * @param string $attributeCode
      * @param array $attributeConfig
      * @return array
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function getFieldOptions($attributeCode, array $attributeConfig)
     {
-        return $attributeConfig['options'] ?? [];
+        return isset($attributeConfig['options']) ? $attributeConfig['options'] : [];
     }
 
     /**

@@ -15,7 +15,7 @@
             <title value="Customer Checkout"/>
             <description value="To be sure that other elements of Success page are shown for placed order as registered Customer."/>
             <severity value="CRITICAL"/>
-            <testCaseId value="MC-16488"/>
+            <testCaseId value="MAGETWO-60345"/>
             <group value="checkout"/>
         </annotations>
 
@@ -30,7 +30,7 @@
             <!--Logout from customer account-->
             <amOnPage url="customer/account/logout/" stepKey="logoutCustomerOne"/>
             <waitForPageLoad stepKey="waitLogoutCustomerOne"/>
-            <actionGroup ref="logout" stepKey="adminLogout"/>
+            <amOnPage url="admin/admin/auth/logout/" stepKey="amOnLogoutPage"/>
             <deleteData createDataKey="createSimpleProduct" stepKey="deleteProduct"/>
             <deleteData createDataKey="createSimpleUsCustomer" stepKey="deleteCustomer"/>
         </after>
@@ -55,8 +55,8 @@
         <waitForLoadingMaskToDisappear stepKey="waitForLoadingMask2"/>
         <waitForElement selector="{{CheckoutShippingMethodsSection.next}}" time="30" stepKey="waitForNextButton"/>
         <click selector="{{CheckoutShippingMethodsSection.next}}" stepKey="clickNext"/>
-        <!-- Checkout select Check/Money Order payment -->
-        <actionGroup ref="CheckoutSelectCheckMoneyOrderPaymentActionGroup" stepKey="selectCheckMoneyPayment"/>
+        <waitForElement selector="{{CheckoutPaymentSection.paymentSectionTitle}}" time="30" stepKey="waitForPaymentSectionLoadedTest3"/>
+
         <!--Click Place Order button-->
         <click selector="{{CheckoutPaymentSection.placeOrder}}" stepKey="clickPlaceOrder"/>
         <see selector="{{CheckoutSuccessMainSection.successTitle}}" userInput="Thank you for your purchase!" stepKey="seeSuccessTitle"/>
@@ -81,8 +81,7 @@
         <waitForLoadingMaskToDisappear stepKey="waitForLoadingMask3"/>
         <waitForElement selector="{{CheckoutShippingMethodsSection.next}}" time="30" stepKey="waitForNextButton2"/>
         <click selector="{{CheckoutShippingMethodsSection.next}}" stepKey="clickNext2"/>
-        <!-- Checkout select Check/Money Order payment -->
-        <actionGroup ref="CheckoutSelectCheckMoneyOrderPaymentActionGroup" stepKey="selectCheckMoneyPayment2"/>
+        <waitForElement selector="{{CheckoutPaymentSection.paymentSectionTitle}}" time="30" stepKey="waitForPaymentSectionLoadedTest4"/>
 
         <!--Click Place Order button-->
         <click selector="{{CheckoutPaymentSection.placeOrder}}" stepKey="clickPlaceOrder2"/>
@@ -106,9 +105,7 @@
         <waitForLoadingMaskToDisappear stepKey="waitForLoadingMask4"/>
         <waitForElement selector="{{CheckoutShippingMethodsSection.next}}" time="30" stepKey="waitForNextButton3"/>
         <click selector="{{CheckoutShippingMethodsSection.next}}" stepKey="clickNext3"/>
-
-        <!-- Checkout select Check/Money Order payment -->
-        <actionGroup ref="CheckoutSelectCheckMoneyOrderPaymentActionGroup" stepKey="selectCheckMoneyPayment3"/>
+        <waitForElement selector="{{CheckoutPaymentSection.paymentSectionTitle}}" time="30" stepKey="waitForPaymentSectionLoadedTest5"/>
 
         <!--Click Place Order button-->
         <click selector="{{CheckoutPaymentSection.placeOrder}}" stepKey="clickPlaceOrder3"/>
@@ -135,10 +132,10 @@
         <annotations>
             <features value="Checkout"/>
             <stories value="Success page elements are presented for placed order as Guest"/>
-            <title value="Guest Checkout - elements of success page are presented for placed order as guest"/>
-            <description value="To be sure that other elements of Success page are presented for placed order as Guest"/>
+            <title value="Customer Checkout"/>
+            <description value="To be sure that other elements of Success page are presented for placed order as Guest."/>
             <severity value="CRITICAL"/>
-            <testCaseId value="MC-16490"/>
+            <testCaseId value="MAGETWO-60346"/>
             <group value="checkout"/>
         </annotations>
 
@@ -147,7 +144,7 @@
         </before>
 
         <after>
-            <actionGroup ref="logout" stepKey="adminLogout"/>
+            <amOnPage url="admin/admin/auth/logout/" stepKey="amOnLogoutPage"/>
             <deleteData createDataKey="createSimpleProduct" stepKey="deleteProduct"/>
         </after>
 
@@ -167,9 +164,6 @@
             <argument name="customerVar" value="CustomerEntityOne" />
             <argument name="customerAddressVar" value="CustomerAddressSimple" />
         </actionGroup>
-
-        <!-- Checkout select Check/Money Order payment -->
-        <actionGroup ref="CheckoutSelectCheckMoneyOrderPaymentActionGroup" stepKey="selectCheckMoneyPayment"/>
 
         <!--Click Place Order button-->
         <click selector="{{CheckoutPaymentSection.placeOrder}}" stepKey="clickPlaceOrder"/>
@@ -203,9 +197,6 @@
             <argument name="customerVar" value="CustomerEntityOne" />
             <argument name="customerAddressVar" value="CustomerAddressSimple" />
         </actionGroup>
-
-        <!-- Checkout select Check/Money Order payment -->
-        <actionGroup ref="CheckoutSelectCheckMoneyOrderPaymentActionGroup" stepKey="selectCheckMoneyPayment2"/>
 
         <!--Click Place Order button-->
         <click selector="{{CheckoutPaymentSection.placeOrder}}" stepKey="clickPlaceOrder2"/>

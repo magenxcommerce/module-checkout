@@ -60,10 +60,7 @@ define([
             template: 'Magento_Checkout/shipping',
             shippingFormTemplate: 'Magento_Checkout/shipping-address/form',
             shippingMethodListTemplate: 'Magento_Checkout/shipping-address/shipping-method-list',
-            shippingMethodItemTemplate: 'Magento_Checkout/shipping-address/shipping-method-item',
-            imports: {
-                countryOptions: '${ $.parentName }.shippingAddress.shipping-address-fieldset.country_id:indexedOptions'
-            }
+            shippingMethodItemTemplate: 'Magento_Checkout/shipping-address/shipping-method-item'
         },
         visible: ko.observable(!quote.isVirtual()),
         errorValidationMessage: ko.observable(false),
@@ -90,7 +87,7 @@ define([
                     '',
                     $t('Shipping'),
                     this.visible, _.bind(this.navigate, this),
-                    this.sortOrder
+                    10
                 );
             }
             checkoutDataResolver.resolveShippingAddress();
@@ -252,16 +249,6 @@ define([
             if (this.validateShippingInformation()) {
                 quote.billingAddress(null);
                 checkoutDataResolver.resolveBillingAddress();
-                registry.async('checkoutProvider')(function (checkoutProvider) {
-                    var shippingAddressData = checkoutData.getShippingAddressFromData();
-
-                    if (shippingAddressData) {
-                        checkoutProvider.set(
-                            'shippingAddress',
-                            $.extend(true, {}, checkoutProvider.get('shippingAddress'), shippingAddressData)
-                        );
-                    }
-                });
                 setShippingInformationAction().done(
                     function () {
                         stepNavigator.next();
@@ -278,9 +265,7 @@ define([
                 addressData,
                 loginFormSelector = 'form[data-role=email-with-possible-login]',
                 emailValidationResult = customer.isLoggedIn(),
-                field,
-                option = _.isObject(this.countryOptions) && this.countryOptions[quote.shippingAddress().countryId],
-                messageContainer = registry.get('checkout.errors').messageContainer;
+                field;
 
             if (!quote.shippingMethod()) {
                 this.errorValidationMessage(
@@ -333,16 +318,6 @@ define([
                     shippingAddress['save_in_address_book'] = 1;
                 }
                 selectShippingAddress(shippingAddress);
-            } else if (customer.isLoggedIn() &&
-                option &&
-                option['is_region_required'] &&
-                !quote.shippingAddress().region
-            ) {
-                messageContainer.addErrorMessage({
-                    message: $t('Please specify a regionId in shipping address.')
-                });
-
-                return false;
             }
 
             if (!emailValidationResult) {

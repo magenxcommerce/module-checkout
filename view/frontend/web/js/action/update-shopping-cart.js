@@ -6,7 +6,7 @@
 define([
     'Magento_Ui/js/modal/alert',
     'jquery',
-    'jquery-ui-modules/widget',
+    'jquery/ui',
     'mage/validation'
 ], function (alert, $) {
     'use strict';
@@ -14,8 +14,7 @@ define([
     $.widget('mage.updateShoppingCart', {
         options: {
             validationURL: '',
-            eventName: 'updateCartItemQty',
-            updateCartActionContainer: ''
+            eventName: 'updateCartItemQty'
         },
 
         /** @inheritdoc */
@@ -32,9 +31,7 @@ define([
          * @return {Boolean}
          */
         onSubmit: function (event) {
-            var action = this.element.find(this.options.updateCartActionContainer).val();
-
-            if (!this.options.validationURL || action === 'empty_cart') {
+            if (!this.options.validationURL) {
                 return true;
             }
 
@@ -122,9 +119,6 @@ define([
         submitForm: function () {
             this.element
                 .off('submit', this.onSubmit)
-                .on('submit', function () {
-                    $(document.body).trigger('processStart');
-                })
                 .submit();
         }
     });

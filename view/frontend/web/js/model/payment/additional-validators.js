@@ -35,17 +35,15 @@ define([], function () {
          *
          * @returns {Boolean}
          */
-        validate: function (hideError) {
+        validate: function () {
             var validationResult = true;
-
-            hideError = hideError || false;
 
             if (validators.length <= 0) {
                 return validationResult;
             }
 
             validators.forEach(function (item) {
-                if (item.validate(hideError) == false) { //eslint-disable-line eqeqeq
+                if (item.validate() == false) { //eslint-disable-line eqeqeq
                     validationResult = false;
 
                     return false;

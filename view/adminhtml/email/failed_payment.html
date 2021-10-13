@@ -6,13 +6,13 @@
 -->
 <!--@subject {{trans "Payment Transaction Failed Reminder"}} @-->
 <!--@vars {
-"var billingAddressHtml|raw":"Billing Address",
+"var billingAddress.format('html')|raw":"Billing Address",
 "var checkoutType":"Checkout Type",
 "var customerEmail":"Customer Email",
 "var customer":"Customer Name",
 "var dateAndTime":"Date and Time of Transaction",
 "var paymentMethod":"Payment Method",
-"var shippingAddressHtml|raw":"Shipping Address",
+"var shippingAddress.format('html')|raw":"Shipping Address",
 "var shippingMethod":"Shipping Method",
 "var items|raw":"Shopping Cart Items",
 "var total":"Total",
@@ -23,43 +23,43 @@
 
 <ul>
     <li>
-        <strong>{{trans "Reason"}}</strong><br />
+        <b>{{trans "Reason"}}</b><br />
         {{var reason}}
     </li>
     <li>
-        <strong>{{trans "Checkout Type"}}</strong><br />
+        <b>{{trans "Checkout Type"}}</b><br />
         {{var checkoutType}}
     </li>
     <li>
-        <strong>{{trans "Customer:"}}</strong><br />
+        <b>{{trans "Customer:"}}</b><br />
         <a href="mailto:{{var customerEmail}}">{{var customer}}</a> &lt;{{var customerEmail}}&gt;
     </li>
     <li>
-        <strong>{{trans "Items"}}</strong><br />
+        <b>{{trans "Items"}}</b><br />
         {{var items|raw}}
     </li>
     <li>
-        <strong>{{trans "Total:"}}</strong><br />
+        <b>{{trans "Total:"}}</b><br />
         {{var total}}
     </li>
     <li>
-        <strong>{{trans "Billing Address:"}}</strong><br />
-        {{var billingAddressHtml|raw}}
+        <b>{{trans "Billing Address:"}}</b><br />
+        {{var billingAddress.format('html')|raw}}
     </li>
     <li>
-        <strong>{{trans "Shipping Address:"}}</strong><br />
-        {{var shippingAddressHtml|raw}}
+        <b>{{trans "Shipping Address:"}}</b><br />
+        {{var shippingAddress.format('html')|raw}}
     </li>
     <li>
-        <strong>{{trans "Shipping Method:"}}</strong><br />
+        <b>{{trans "Shipping Method:"}}</b><br />
         {{var shippingMethod}}
     </li>
     <li>
-        <strong>{{trans "Payment Method:"}}</strong><br />
+        <b>{{trans "Payment Method:"}}</b><br />
         {{var paymentMethod}}
     </li>
     <li>
-        <strong>{{trans "Date & Time:"}}</strong><br />
+        <b>{{trans "Date & Time:"}}</b><br />
         {{var dateAndTime}}
     </li>
 </ul>

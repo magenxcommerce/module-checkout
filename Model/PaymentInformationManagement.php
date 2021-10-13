@@ -9,8 +9,6 @@ namespace Magento\Checkout\Model;
 use Magento\Framework\Exception\CouldNotSaveException;
 
 /**
- * Payment information management service.
- *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class PaymentInformationManagement implements \Magento\Checkout\Api\PaymentInformationManagementInterface
@@ -74,7 +72,7 @@ class PaymentInformationManagement implements \Magento\Checkout\Api\PaymentInfor
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public function savePaymentInformationAndPlaceOrder(
         $cartId,
@@ -85,9 +83,6 @@ class PaymentInformationManagement implements \Magento\Checkout\Api\PaymentInfor
         try {
             $orderId = $this->cartManagement->placeOrder($cartId);
         } catch (\Magento\Framework\Exception\LocalizedException $e) {
-            $this->getLogger()->critical(
-                'Placing an order with quote_id ' . $cartId . ' is failed: ' . $e->getMessage()
-            );
             throw new CouldNotSaveException(
                 __($e->getMessage()),
                 $e
@@ -103,7 +98,7 @@ class PaymentInformationManagement implements \Magento\Checkout\Api\PaymentInfor
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public function savePaymentInformation(
         $cartId,
@@ -115,21 +110,14 @@ class PaymentInformationManagement implements \Magento\Checkout\Api\PaymentInfor
             $quoteRepository = $this->getCartRepository();
             /** @var \Magento\Quote\Model\Quote $quote */
             $quote = $quoteRepository->getActive($cartId);
-            $customerId = $quote->getBillingAddress()
-                ->getCustomerId();
-            if (!$billingAddress->getCustomerId() && $customerId) {
-                //It's necessary to verify the price rules with the customer data
-                $billingAddress->setCustomerId($customerId);
-            }
             $quote->removeAddress($quote->getBillingAddress()->getId());
             $quote->setBillingAddress($billingAddress);
             $quote->setDataChanges(true);
             $shippingAddress = $quote->getShippingAddress();
             if ($shippingAddress && $shippingAddress->getShippingMethod()) {
-                $shippingRate = $shippingAddress->getShippingRateByCode($shippingAddress->getShippingMethod());
-                if ($shippingRate) {
-                    $shippingAddress->setLimitCarrier($shippingRate->getCarrier());
-                }
+                $shippingDataArray = explode('_', $shippingAddress->getShippingMethod());
+                $shippingCarrier = array_shift($shippingDataArray);
+                $shippingAddress->setLimitCarrier($shippingCarrier);
             }
         }
         $this->paymentMethodManagement->set($cartId, $paymentMethod);
@@ -137,7 +125,7 @@ class PaymentInformationManagement implements \Magento\Checkout\Api\PaymentInfor
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     public function getPaymentInformation($cartId)
     {

@@ -17,8 +17,7 @@ define([
     'Magento_Customer/js/customer-data',
     'Magento_Checkout/js/action/set-billing-address',
     'Magento_Ui/js/model/messageList',
-    'mage/translate',
-    'Magento_Checkout/js/model/billing-address-postcode-validator'
+    'mage/translate'
 ],
 function (
     ko,
@@ -34,29 +33,35 @@ function (
     customerData,
     setBillingAddressAction,
     globalMessageList,
-    $t,
-    billingAddressPostcodeValidator
+    $t
 ) {
     'use strict';
 
     var lastSelectedBillingAddress = null,
+        newAddressOption = {
+            /**
+             * Get new address label
+             * @returns {String}
+             */
+            getAddressInline: function () {
+                return $t('New Address');
+            },
+            customerAddressId: null
+        },
         countryData = customerData.get('directory-data'),
         addressOptions = addressList().filter(function (address) {
-            return address.getType() === 'customer-address';
+            return address.getType() == 'customer-address'; //eslint-disable-line eqeqeq
         });
+
+    addressOptions.push(newAddressOption);
 
     return Component.extend({
         defaults: {
-            template: 'Magento_Checkout/billing-address',
-            actionsTemplate: 'Magento_Checkout/billing-address/actions',
-            formTemplate: 'Magento_Checkout/billing-address/form',
-            detailsTemplate: 'Magento_Checkout/billing-address/details',
-            links: {
-                isAddressFormVisible: '${$.billingAddressListProvider}:isNewAddressSelected'
-            }
+            template: 'Magento_Checkout/billing-address'
         },
         currentBillingAddress: quote.billingAddress,
-        customerHasAddresses: addressOptions.length > 0,
+        addressOptions: addressOptions,
+        customerHasAddresses: addressOptions.length > 1,
 
         /**
          * Init component
@@ -66,7 +71,6 @@ function (
             quote.paymentMethod.subscribe(function () {
                 checkoutDataResolver.resolveBillingAddress();
             }, this);
-            billingAddressPostcodeValidator.initFields(this.get('name') + '.form-fields');
         },
 
         /**
@@ -77,7 +81,7 @@ function (
                 .observe({
                     selectedAddress: null,
                     isAddressDetailsVisible: quote.billingAddress() != null,
-                    isAddressFormVisible: !customer.isLoggedIn() || !addressOptions.length,
+                    isAddressFormVisible: !customer.isLoggedIn() || addressOptions.length === 1,
                     isAddressSameAsShipping: false,
                     saveInAddressBook: 1
                 });
@@ -140,7 +144,7 @@ function (
         updateAddress: function () {
             var addressData, newBillingAddress;
 
-            if (this.selectedAddress() && !this.isAddressFormVisible()) {
+            if (this.selectedAddress() && this.selectedAddress() != newAddressOption) { //eslint-disable-line eqeqeq
                 selectBillingAddress(this.selectedAddress());
                 checkoutData.setSelectedBillingAddress(this.selectedAddress().getKey());
             } else {
@@ -159,6 +163,7 @@ function (
                     }
                     addressData['save_in_address_book'] = this.saveInAddressBook() ? 1 : 0;
                     newBillingAddress = createBillingAddress(addressData);
+
                     // New address must be selected as a billing address
                     selectBillingAddress(newBillingAddress);
                     checkoutData.setSelectedBillingAddress(newBillingAddress.getKey());
@@ -195,19 +200,19 @@ function (
         },
 
         /**
-         * Manage cancel button visibility
-         */
-        canUseCancelBillingAddress: ko.computed(function () {
-            return quote.billingAddress() || lastSelectedBillingAddress;
-        }),
-
-        /**
          * Restore billing address
          */
         restoreBillingAddress: function () {
             if (lastSelectedBillingAddress != null) {
                 selectBillingAddress(lastSelectedBillingAddress);
             }
+        },
+
+        /**
+         * @param {Object} address
+         */
+        onAddressChange: function (address) {
+            this.isAddressFormVisible(address == newAddressOption); //eslint-disable-line eqeqeq
         },
 
         /**
@@ -236,32 +241,6 @@ function (
          */
         getCode: function (parent) {
             return _.isFunction(parent.getCode) ? parent.getCode() : 'shared';
-        },
-
-        /**
-         * Get customer attribute label
-         *
-         * @param {*} attribute
-         * @returns {*}
-         */
-        getCustomAttributeLabel: function (attribute) {
-            var resultAttribute;
-
-            if (typeof attribute === 'string') {
-                return attribute;
-            }
-
-            if (attribute.label) {
-                return attribute.label;
-            }
-
-            if (typeof this.source.get('customAttributes') !== 'undefined') {
-                resultAttribute = _.findWhere(this.source.get('customAttributes')[attribute['attribute_code']], {
-                    value: attribute.value
-                });
-            }
-
-            return resultAttribute && resultAttribute.label || attribute.value;
         }
     });
 });

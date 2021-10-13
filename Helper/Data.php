@@ -59,8 +59,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     private $paymentFailures;
 
     /**
-     * Data constructor.
-     *
      * @param \Magento\Framework\App\Helper\Context $context
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Magento\Checkout\Model\Session $checkoutSession
@@ -115,8 +113,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Format Price
-     *
      * @param float $price
      * @return string
      */
@@ -131,8 +127,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Convert Price
-     *
      * @param float $price
      * @param bool $format
      * @return float
@@ -151,9 +145,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      */
     public function canOnepageCheckout()
     {
-        return $this->scopeConfig->isSetFlag(
+        return (bool)$this->scopeConfig->getValue(
             'checkout/options/onepage_checkout_enabled',
-            ScopeInterface::SCOPE_STORE
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
         );
     }
 
@@ -190,8 +184,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Get Base Price Incl Tax
-     *
      * @param AbstractItem $item
      * @return float
      */
@@ -204,8 +196,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Get Base Subtotal Incl Tax
-     *
      * @param AbstractItem $item
      * @return float
      */
@@ -227,15 +217,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Quote\Model\Quote $checkout,
         string $message,
         string $checkoutType = 'onepage'
-    ): Data {
+    ): \Magento\Checkout\Helper\Data {
         $this->paymentFailures->handle((int)$checkout->getId(), $message, $checkoutType);
 
         return $this;
     }
 
     /**
-     * Get Emails
-     *
      * @param string $configPath
      * @param null|string|bool|int|Store $storeId
      * @return array|false
@@ -244,7 +232,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $data = $this->scopeConfig->getValue(
             $configPath,
-            ScopeInterface::SCOPE_STORE,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
             $storeId
         );
         if (!empty($data)) {
@@ -254,7 +242,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Check is allowed Guest Checkout. Use config settings and observer
+     * Check is allowed Guest Checkout
+     * Use config settings and observer
      *
      * @param \Magento\Quote\Model\Quote $quote
      * @param int|Store $store
@@ -267,7 +256,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         $guestCheckout = $this->scopeConfig->isSetFlag(
             self::XML_PATH_GUEST_CHECKOUT,
-            ScopeInterface::SCOPE_STORE,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
             $store
         );
 
@@ -306,13 +295,13 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             self::XML_PATH_CUSTOMER_MUST_BE_LOGGED,
-            ScopeInterface::SCOPE_STORE
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
         );
     }
 
     /**
-     * If display billing address on payment method is available, otherwise should be display on payment page
-     *
+     * Checks if display billing address on payment method is available, otherwise
+     * billing address should be display on payment page
      * @return bool
      */
     public function isDisplayBillingOnPaymentMethodAvailable()

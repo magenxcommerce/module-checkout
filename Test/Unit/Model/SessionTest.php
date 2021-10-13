@@ -3,41 +3,21 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-declare(strict_types=1);
 
 /**
  * Test class for \Magento\Checkout\Model\Session
  */
 namespace Magento\Checkout\Test\Unit\Model;
 
-use Magento\Checkout\Model\Session;
-use Magento\Framework\App\Request\Http;
-use Magento\Framework\App\State;
-use Magento\Framework\Event\ManagerInterface;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Message\CollectionFactory;
-use Magento\Framework\Session\Storage;
-use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
-use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Model\Quote;
-use Magento\Quote\Model\QuoteFactory;
-use Magento\Quote\Model\QuoteIdMask;
-use Magento\Quote\Model\QuoteIdMaskFactory;
-use Magento\Sales\Model\Order;
-use Magento\Sales\Model\OrderFactory;
-use Magento\Store\Model\Store;
-use Magento\Store\Model\StoreManagerInterface;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
+use \Magento\Checkout\Model\Session;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class SessionTest extends TestCase
+class SessionTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @var ObjectManager
+     * @var \Magento\Framework\TestFramework\Unit\Helper\ObjectManager
      */
     protected $_helper;
 
@@ -46,51 +26,48 @@ class SessionTest extends TestCase
      */
     protected $_session;
 
-    protected function setUp(): void
+    protected function setUp()
     {
-        $this->_helper = new ObjectManager($this);
+        $this->_helper = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
     }
 
     /**
      * @param int|null $orderId
      * @param int|null $incrementId
-     * @param Order|MockObject $orderMock
+     * @param \Magento\Sales\Model\Order|\PHPUnit_Framework_MockObject_MockObject $orderMock
      * @dataProvider getLastRealOrderDataProvider
      */
     public function testGetLastRealOrder($orderId, $incrementId, $orderMock)
     {
-        $orderFactory = $this->getMockBuilder(OrderFactory::class)
+        $orderFactory = $this->getMockBuilder(\Magento\Sales\Model\OrderFactory::class)
             ->disableOriginalConstructor()
             ->setMethods(['create'])
             ->getMock();
-        $orderFactory->expects($this->once())->method('create')->willReturn($orderMock);
+        $orderFactory->expects($this->once())->method('create')->will($this->returnValue($orderMock));
 
-        $messageCollectionFactory = $this->getMockBuilder(CollectionFactory::class)
+        $messageCollectionFactory = $this->getMockBuilder(\Magento\Framework\Message\CollectionFactory::class)
             ->disableOriginalConstructor()
             ->setMethods(['create'])
             ->getMock();
-        $quoteRepository = $this->getMockForAbstractClass(CartRepositoryInterface::class);
+        $quoteRepository = $this->createMock(\Magento\Quote\Api\CartRepositoryInterface::class);
 
-        $appState = $this->getMockBuilder(State::class)
-            ->addMethods(['isInstalled'])
-            ->disableOriginalConstructor()
-            ->getMock();
-        $appState->expects($this->any())->method('isInstalled')->willReturn(true);
+        $appState = $this->createPartialMock(\Magento\Framework\App\State::class, ['isInstalled']);
+        $appState->expects($this->any())->method('isInstalled')->will($this->returnValue(true));
 
-        $request = $this->createMock(Http::class);
-        $request->expects($this->any())->method('getHttpHost')->willReturn([]);
+        $request = $this->createMock(\Magento\Framework\App\Request\Http::class);
+        $request->expects($this->any())->method('getHttpHost')->will($this->returnValue([]));
 
         $constructArguments = $this->_helper->getConstructArguments(
-            Session::class,
+            \Magento\Checkout\Model\Session::class,
             [
                 'request' => $request,
                 'orderFactory' => $orderFactory,
                 'messageCollectionFactory' => $messageCollectionFactory,
                 'quoteRepository' => $quoteRepository,
-                'storage' => new Storage()
+                'storage' => new \Magento\Framework\Session\Storage()
             ]
         );
-        $this->_session = $this->_helper->getObject(Session::class, $constructArguments);
+        $this->_session = $this->_helper->getObject(\Magento\Checkout\Model\Session::class, $constructArguments);
         $this->_session->setLastRealOrderId($orderId);
 
         $this->assertSame($orderMock, $this->_session->getLastRealOrder());
@@ -114,20 +91,19 @@ class SessionTest extends TestCase
     /**
      * @param int|null $incrementId
      * @param int|null $orderId
-     * @return Order|MockObject
+     * @return \Magento\Sales\Model\Order|\PHPUnit_Framework_MockObject_MockObject
      */
     protected function _getOrderMock($incrementId, $orderId)
     {
-        /** @var MockObject|\Magento\Sales\Model\Order $order */
+        /** @var $order \PHPUnit_Framework_MockObject_MockObject|\Magento\Sales\Model\Order */
         $order = $this->getMockBuilder(
-            Order::class
-        )->disableOriginalConstructor()
-            ->setMethods(
-                ['getIncrementId', 'loadByIncrementId', '__sleep']
-            )->getMock();
+            \Magento\Sales\Model\Order::class
+        )->disableOriginalConstructor()->setMethods(
+            ['getIncrementId', 'loadByIncrementId', '__sleep', '__wakeup']
+        )->getMock();
 
         if ($orderId && $incrementId) {
-            $order->expects($this->once())->method('getIncrementId')->willReturn($incrementId);
+            $order->expects($this->once())->method('getIncrementId')->will($this->returnValue($incrementId));
             $order->expects($this->once())->method('loadByIncrementId')->with($orderId);
         }
 
@@ -140,8 +116,8 @@ class SessionTest extends TestCase
      */
     public function testClearHelperData($paramToClear)
     {
-        $storage = new Storage('default', [$paramToClear => 'test_data']);
-        $this->_session = $this->_helper->getObject(Session::class, ['storage' => $storage]);
+        $storage = new \Magento\Framework\Session\Storage('default', [$paramToClear => 'test_data']);
+        $this->_session = $this->_helper->getObject(\Magento\Checkout\Model\Session::class, ['storage' => $storage]);
 
         $this->_session->clearHelperData();
         $this->assertNull($this->_session->getData($paramToClear));
@@ -169,24 +145,24 @@ class SessionTest extends TestCase
     public function testRestoreQuote($hasOrderId, $hasQuoteId)
     {
         $order = $this->createPartialMock(
-            Order::class,
-            ['getId', 'loadByIncrementId']
+            \Magento\Sales\Model\Order::class,
+            ['getId', 'loadByIncrementId', '__wakeup']
         );
-        $order->expects($this->once())->method('getId')->willReturn($hasOrderId ? 'order id' : null);
-        $orderFactory = $this->createPartialMock(OrderFactory::class, ['create']);
-        $orderFactory->expects($this->once())->method('create')->willReturn($order);
-        $quoteRepository = $this->getMockBuilder(CartRepositoryInterface::class)
+        $order->expects($this->once())->method('getId')->will($this->returnValue($hasOrderId ? 'order id' : null));
+        $orderFactory = $this->createPartialMock(\Magento\Sales\Model\OrderFactory::class, ['create']);
+        $orderFactory->expects($this->once())->method('create')->will($this->returnValue($order));
+        $quoteRepository = $this->getMockBuilder(\Magento\Quote\Api\CartRepositoryInterface::class)
             ->setMethods(['save'])
             ->getMockForAbstractClass();
-        $storage = new Storage();
-        $store = $this->createMock(Store::class);
-        $storeManager = $this->getMockForAbstractClass(StoreManagerInterface::class);
-        $storeManager->expects($this->any())->method('getStore')->willReturn($store);
-        $eventManager = $this->getMockForAbstractClass(ManagerInterface::class);
+        $storage = new \Magento\Framework\Session\Storage();
+        $store = $this->createMock(\Magento\Store\Model\Store::class);
+        $storeManager = $this->getMockForAbstractClass(\Magento\Store\Model\StoreManagerInterface::class);
+        $storeManager->expects($this->any())->method('getStore')->will($this->returnValue($store));
+        $eventManager = $this->getMockForAbstractClass(\Magento\Framework\Event\ManagerInterface::class);
 
         /** @var Session $session */
         $session = $this->_helper->getObject(
-            Session::class,
+            \Magento\Checkout\Model\Session::class,
             [
                 'orderFactory' => $orderFactory,
                 'quoteRepository' => $quoteRepository,
@@ -204,8 +180,8 @@ class SessionTest extends TestCase
         if ($hasOrderId) {
             $order->setQuoteId($quoteId);
             $quote = $this->createPartialMock(
-                Quote::class,
-                ['setIsActive', 'getId', 'setReservedOrderId', 'save']
+                \Magento\Quote\Model\Quote::class,
+                ['setIsActive', 'getId', 'setReservedOrderId', '__wakeup', 'save']
             );
             if ($hasQuoteId) {
                 $quoteRepository->expects($this->once())->method('get')->with($quoteId)->willReturn($quote);
@@ -213,8 +189,8 @@ class SessionTest extends TestCase
                     $this->any()
                 )->method(
                     'getId'
-                )->willReturn(
-                    $anotherQuoteId
+                )->will(
+                    $this->returnValue($anotherQuoteId)
                 );
                 $eventManager->expects(
                     $this->once()
@@ -229,22 +205,26 @@ class SessionTest extends TestCase
                 )->method(
                     'setIsActive'
                 )->with(
-                    1
-                )->willReturnSelf();
+                    $this->equalTo(1)
+                )->will(
+                    $this->returnSelf()
+                );
                 $quote->expects(
                     $this->once()
                 )->method(
                     'setReservedOrderId'
                 )->with(
                     $this->isNull()
-                )->willReturnSelf();
+                )->will(
+                    $this->returnSelf()
+                );
                 $quoteRepository->expects($this->once())->method('save')->with($quote);
             } else {
                 $quoteRepository->expects($this->once())
                     ->method('get')
                     ->with($quoteId)
                     ->willThrowException(
-                        new NoSuchEntityException()
+                        new \Magento\Framework\Exception\NoSuchEntityException()
                     );
                 $quote->expects($this->never())->method('setIsActive');
                 $quote->expects($this->never())->method('setReservedOrderId');
@@ -272,10 +252,10 @@ class SessionTest extends TestCase
 
     public function testHasQuote()
     {
-        $quote = $this->getMockBuilder(Quote::class)
+        $quote = $this->getMockBuilder(\Magento\Quote\Model\Quote::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $session = $this->_helper->getObject(Session::class, ['quote' => $quote]);
+        $session = $this->_helper->getObject(\Magento\Checkout\Model\Session::class, ['quote' => $quote]);
         $this->assertFalse($session->hasQuote());
     }
 
@@ -284,27 +264,27 @@ class SessionTest extends TestCase
         $replaceQuoteId = 3;
         $websiteId = 1;
 
-        $store = $this->getMockBuilder(Store::class)
+        $store = $this->getMockBuilder(\Magento\Store\Model\Store::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getWebsiteId'])
+            ->setMethods(['getWebsiteId', '__wakeup'])
             ->getMock();
         $store->expects($this->any())
             ->method('getWebsiteId')
-            ->willReturn($websiteId);
+            ->will($this->returnValue($websiteId));
 
-        $storeManager = $this->getMockForAbstractClass(StoreManagerInterface::class);
+        $storeManager = $this->getMockForAbstractClass(\Magento\Store\Model\StoreManagerInterface::class);
         $storeManager->expects($this->any())
             ->method('getStore')
-            ->willReturn($store);
+            ->will($this->returnValue($store));
 
-        $quote = $this->getMockBuilder(Quote::class)
+        $quote = $this->getMockBuilder(\Magento\Quote\Model\Quote::class)
             ->disableOriginalConstructor()
             ->getMock();
         $quote->expects($this->once())
             ->method('getId')
-            ->willReturn($replaceQuoteId);
+            ->will($this->returnValue($replaceQuoteId));
 
-        $storage = $this->getMockBuilder(Storage::class)
+        $storage = $this->getMockBuilder(\Magento\Framework\Session\Storage::class)
             ->disableOriginalConstructor()
             ->setMethods(['setData', 'getData'])
             ->getMock();
@@ -315,21 +295,20 @@ class SessionTest extends TestCase
         $storage->expects($this->any())
             ->method('setData');
 
-        $quoteIdMaskMock = $this->getMockBuilder(QuoteIdMask::class)
-            ->addMethods(['getMaskedId', 'setQuoteId'])
-            ->onlyMethods(['load', 'save'])
-            ->disableOriginalConstructor()
-            ->getMock();
+        $quoteIdMaskMock = $this->createPartialMock(
+            \Magento\Quote\Model\QuoteIdMask::class,
+            ['getMaskedId', 'load', 'setQuoteId', 'save']
+        );
         $quoteIdMaskMock->expects($this->once())->method('load')->with($replaceQuoteId, 'quote_id')->willReturnSelf();
         $quoteIdMaskMock->expects($this->once())->method('getMaskedId')->willReturn(null);
         $quoteIdMaskMock->expects($this->once())->method('setQuoteId')->with($replaceQuoteId)->willReturnSelf();
         $quoteIdMaskMock->expects($this->once())->method('save');
 
-        $quoteIdMaskFactoryMock = $this->createPartialMock(QuoteIdMaskFactory::class, ['create']);
+        $quoteIdMaskFactoryMock = $this->createPartialMock(\Magento\Quote\Model\QuoteIdMaskFactory::class, ['create']);
         $quoteIdMaskFactoryMock->expects($this->once())->method('create')->willReturn($quoteIdMaskMock);
 
         $session = $this->_helper->getObject(
-            Session::class,
+            \Magento\Checkout\Model\Session::class,
             [
                 'storeManager' => $storeManager,
                 'storage' => $storage,
@@ -345,7 +324,7 @@ class SessionTest extends TestCase
 
     public function testClearStorage()
     {
-        $storage = $this->getMockBuilder(Storage::class)
+        $storage = $this->getMockBuilder(\Magento\Framework\Session\Storage::class)
             ->disableOriginalConstructor()
             ->setMethods(['unsetData'])
             ->getMock();
@@ -353,13 +332,13 @@ class SessionTest extends TestCase
             ->method('unsetData');
 
         $session = $this->_helper->getObject(
-            Session::class,
+            \Magento\Checkout\Model\Session::class,
             [
                 'storage' => $storage
             ]
         );
 
-        $this->assertInstanceOf(Session::class, $session->clearStorage());
+        $this->assertInstanceOf(\Magento\Checkout\Model\Session::class, $session->clearStorage());
         $this->assertFalse($session->hasQuote());
     }
 
@@ -367,11 +346,11 @@ class SessionTest extends TestCase
     {
         /** @var $session \Magento\Checkout\Model\Session */
         $session = $this->_helper->getObject(
-            Session::class,
-            ['storage' => new Storage()]
+            \Magento\Checkout\Model\Session::class,
+            ['storage' => new \Magento\Framework\Session\Storage()]
         );
         $session->resetCheckout();
-        $this->assertEquals(Session::CHECKOUT_STATE_BEGIN, $session->getCheckoutState());
+        $this->assertEquals(\Magento\Checkout\Model\Session::CHECKOUT_STATE_BEGIN, $session->getCheckoutState());
     }
 
     public function testGetStepData()
@@ -384,8 +363,8 @@ class SessionTest extends TestCase
         ];
         /** @var $session \Magento\Checkout\Model\Session */
         $session = $this->_helper->getObject(
-            Session::class,
-            ['storage' => new Storage()]
+            \Magento\Checkout\Model\Session::class,
+            ['storage' => new \Magento\Framework\Session\Storage()]
         );
         $session->setSteps($stepData);
         $this->assertEquals($stepData, $session->getStepData());
@@ -393,68 +372,6 @@ class SessionTest extends TestCase
         $this->assertEquals($stepData['complex'], $session->getStepData('complex'));
         $this->assertFalse($session->getStepData('simple', 'invalid_sub_key'));
         $this->assertEquals($stepData['complex']['key'], $session->getStepData('complex', 'key'));
-    }
-
-    /**
-     * Ensure that if quote not exist for customer quote will be null
-     *
-     * @return void
-     */
-    public function testGetQuote(): void
-    {
-        $storeManager = $this->getMockForAbstractClass(StoreManagerInterface::class);
-        $customerSession = $this->createMock(\Magento\Customer\Model\Session::class);
-        $quoteRepository = $this->getMockForAbstractClass(CartRepositoryInterface::class);
-        $quoteFactory = $this->createMock(QuoteFactory::class);
-        $quote = $this->createMock(Quote::class);
-        $logger = $this->getMockForAbstractClass(LoggerInterface::class);
-        $loggerMethods = get_class_methods(LoggerInterface::class);
-
-        $quoteFactory->expects($this->once())
-            ->method('create')
-            ->willReturn($quote);
-        $customerSession->expects($this->exactly(3))
-            ->method('isLoggedIn')
-            ->willReturn(true);
-        $store = $this->getMockBuilder(Store::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['getWebsiteId'])
-            ->getMock();
-        $storeManager->expects($this->any())
-            ->method('getStore')
-            ->willReturn($store);
-        $storage = $this->getMockBuilder(Storage::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['setData', 'getData'])
-            ->getMock();
-        $storage->expects($this->at(0))
-            ->method('getData')
-            ->willReturn(1);
-        $quoteRepository->expects($this->once())
-            ->method('getActiveForCustomer')
-            ->willThrowException(new NoSuchEntityException());
-
-        foreach ($loggerMethods as $method) {
-            $logger->expects($this->never())->method($method);
-        }
-
-        $quote->expects($this->once())
-            ->method('setCustomer')
-            ->with(null);
-
-        $constructArguments = $this->_helper->getConstructArguments(
-            Session::class,
-            [
-                'storeManager' => $storeManager,
-                'quoteRepository' => $quoteRepository,
-                'customerSession' => $customerSession,
-                'storage' => $storage,
-                'quoteFactory' => $quoteFactory,
-                'logger' => $logger
-            ]
-        );
-        $this->_session = $this->_helper->getObject(Session::class, $constructArguments);
-        $this->_session->getQuote();
     }
 
     public function testSetStepData()
@@ -466,8 +383,8 @@ class SessionTest extends TestCase
         ];
         /** @var $session \Magento\Checkout\Model\Session */
         $session = $this->_helper->getObject(
-            Session::class,
-            ['storage' => new Storage()]
+            \Magento\Checkout\Model\Session::class,
+            ['storage' => new \Magento\Framework\Session\Storage()]
         );
         $session->setSteps($stepData);
 

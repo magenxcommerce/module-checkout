@@ -7,7 +7,7 @@ define([
     'jquery',
     'mage/template',
     'underscore',
-    'jquery-ui-modules/widget',
+    'jquery/ui',
     'mage/validation'
 ], function ($, mageTemplate, _) {
     'use strict';
@@ -157,13 +157,10 @@ define([
                 regionInput = $(this.options.regionInputId),
                 postcode = $(this.options.postcodeId),
                 label = regionList.parent().siblings('label'),
-                container = regionList.parents('div.field');
+                requiredLabel = regionList.parents('div.field');
 
             this._clearError();
             this._checkRegionRequired(country);
-
-            $(regionList).find('option:selected').removeAttr('selected');
-            regionInput.val('');
 
             // Populate state/province dropdown list if available or use input box
             if (this.options.regionJson[country]) {
@@ -184,16 +181,15 @@ define([
 
                 if (this.options.isRegionRequired) {
                     regionList.addClass('required-entry').removeAttr('disabled');
-                    container.addClass('required').show();
+                    requiredLabel.addClass('required');
                 } else {
                     regionList.removeClass('required-entry validate-select').removeAttr('data-validate');
-                    container.removeClass('required');
+                    requiredLabel.removeClass('required');
 
                     if (!this.options.optionalRegionAllowed) { //eslint-disable-line max-depth
-                        regionList.hide();
-                        container.hide();
+                        regionList.attr('disabled', 'disabled');
                     } else {
-                        regionList.show();
+                        regionList.removeAttr('disabled');
                     }
                 }
 
@@ -205,13 +201,12 @@ define([
 
                 if (this.options.isRegionRequired) {
                     regionInput.addClass('required-entry').removeAttr('disabled');
-                    container.addClass('required').show();
+                    requiredLabel.addClass('required');
                 } else {
                     if (!this.options.optionalRegionAllowed) { //eslint-disable-line max-depth
                         regionInput.attr('disabled', 'disabled');
-                        container.hide();
                     }
-                    container.removeClass('required');
+                    requiredLabel.removeClass('required');
                     regionInput.removeClass('required-entry');
                 }
 

@@ -54,7 +54,7 @@ define([
                 $t('Review & Payments'),
                 this.isVisible,
                 _.bind(this.navigate, this),
-                this.sortOrder
+                20
             );
 
             return this;
@@ -66,21 +66,9 @@ define([
         navigate: function () {
             var self = this;
 
-            if (!self.hasShippingMethod()) {
-                this.isVisible(false);
-                stepNavigator.setHash('shipping');
-            } else {
-                getPaymentInformation().done(function () {
-                    self.isVisible(true);
-                });
-            }
-        },
-
-        /**
-         * @return {Boolean}
-         */
-        hasShippingMethod: function () {
-            return window.checkoutConfig.selectedShippingMethod !== null;
+            getPaymentInformation().done(function () {
+                self.isVisible(true);
+            });
         },
 
         /**

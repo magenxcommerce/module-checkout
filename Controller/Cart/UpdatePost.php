@@ -10,9 +10,9 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 
 /**
- * Post update shopping cart.
+ * Class UpdatePost
  */
-class UpdatePost extends \Magento\Checkout\Controller\Cart implements HttpGetActionInterface, HttpPostActionInterface
+class UpdatePost extends \Magento\Checkout\Controller\Cart implements HttpPostActionInterface, HttpGetActionInterface
 {
     /**
      * @var RequestQuantityProcessor
